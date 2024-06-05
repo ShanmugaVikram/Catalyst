@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        #progress {
+            width: 100%;
+            height: 30px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        #bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload File</h2>
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" id="fileInput">
+        <!-- Add hidden input field for CSRF token -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input type="submit" value="Upload File">
+    </form>
+    <div id="progress">
+        <div id="bar"></div>
+    </div>
+    <div id="status"></div>
+
+    <!-- Include jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = function() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('fileInput').files[0];
+            formData.append('file', fileInput);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload/', true);
+            xhr.upload.onprogress = function(event) {
+                var progressBar = document.getElementById('bar');
+                progressBar.style.width = Math.round(event.loaded / event.total * 100) + '%';
+            };
+            xhr.onload = function() {
+                document.getElementById('status').innerHTML = 'File uploaded successfully!';
+            };
+            xhr.onerror = function() {
+                document.getElementById('status').innerHTML = 'Error uploading file.';
+            };
+            xhr.send(formData);
+            return false;
+        };
+    </script>
+</body>
+</html>
